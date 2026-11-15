@@ -1,0 +1,87 @@
+# Server API (Apps Script `doPost`) — contract v1
+
+The website (`server/Code.gs` + `server/Index.html`) stays the **source of truth** (Google Sheets).
+The desktop and Android apps talk to the *same* deployment through one JSON endpoint.
+
+## Transport
+
+- `POST <WEB_APP_URL>` (the `/exec` URL of the deployed web app, access = "Anyone").
+- Body is a JSON **string** sent with `Content-Type: text/plain;charset=utf-8` (avoids CORS preflight; Apps Script cannot answer `OPTIONS`). Native clients (Electron main process, Kotlin) have no CORS problem; a browser page must use `text/plain` and `redirect:'follow'`.
+- Response is always HTTP 200 with JSON:
+  - success: `{ "ok": true, "data": ... }`
+  - failure: `{ "ok": false, "error": "رسالة عربية واضحة", "code": "AUTH|LICENSE|BUSY|BAD_REQUEST|SERVER" }`
+- Every request: `{ "action": "...", "token": "<device token>", ... }`. `token` is not required for `ping`, `pair`, `licenseCheck`, `licenseActivate`.
+- Time zone of the clinic is Asia/Baghdad. Dates are `YYYY-MM-DD`, times `HH:MM`, date-times `YYYY-MM-DD HH:mm:ss` (strings only).
+
+## Actions
+
+| action | request fields | `data` |
+|---|---|---|
+| `ping` | – | `{ version, clinicName, ymd, hm, apiVersion:1 }` |
+| `pair` | `code`, `deviceName`, `platform` (`desktop`\|`android`) | `{ token, deviceId, config }` — one-time code, valid 10 min |
+| `pairingCode` | `token` | `{ code, expiresAt, url }` — a paired device asks for a code to pair another device (Android QR text is `cm1\|<url>\|<code>`) |
+| `config` | `token` | config object (below) |
+| `setConfig` | `token`, `pin` (finance PIN), `patch` | new config. `patch` keys: `clinicName, doctorName, consultationFee, freeReviewDays, rules` |
+| `rev` | `token` | `{ rev }` — cheap change counter |
+| `snapshot` | `token`, `table`, `from` (row, default 2), `limit` (default 1000) | `{ rev, table, rows:[[row, c1..cN],…], next:null\|row }` — tables: `Patient_Records, Financials, Surgeries, Drugs, Bookings` (Bookings is always returned whole) |
+| `delta` | `token`, `since` (int) | `{ rev, resync:false, tables:{ Patient_Records:[[row,…]], Financials:[…], Surgeries:[…], Drugs:[…] }, bookings:[[row,…]]?, events:[…] }` — `bookings` (the **whole** Bookings table) is present only when it changed or `{ rev, resync:true }` when `since` is older than the change log (client must run a full snapshot) |
+| `call` | `token`, `fn`, `args:[…]`, `cid` | return value of the whitelisted function (idempotent by `cid` for 6 h) |
+| `licenseCheck` | `deviceId`, `platform`, `appVersion`, `label?`, `key?` | `{ status, type, daysLeft, expiresAt, message }` |
+| `licenseActivate` | `deviceId`, `key`, `platform`, `label?` | same as `licenseCheck` (or `ok:false`) |
+
+### Row arrays
+
+`rows` are the raw sheet rows: first element is the 1-based sheet row number, then the columns in the order of `config.headers[table]`. Date columns are normalised to strings (`Visit_Date`, `Last_Visit_Date`, Financials `Date`, Surgeries `Operation_Date` → `YYYY-MM-DD`; Bookings `Call_Time` → `YYYY-MM-DD HH:mm:ss`). Numeric columns (`Age`, `Escorts_Count`, `Amount`, `Use_Count`) are numbers when numeric, else strings (ages like `6M`, `10D`).
+
+Bookings archive moves old rows (row numbers shift) so the client must **replace** its whole Bookings table with the returned list every time.
+
+Row numbers are stable for the other tables (append-only). A row appearing in a `delta` means *upsert by row number*.
+
+### Sync algorithm (clients)
+
+1. First run, or `resync:true`, or every 6 h, or user presses "جلب البيانات": remember `rev0 = rev`, page through every table with `snapshot`, replace local tables, then store `rev0`.
+2. Otherwise poll: `rev` every ~10 s while the window is open (cheap); if changed call `delta{since}`; apply; store returned `rev`.
+3. Writes go through `call` with a fresh `cid` (uuid) kept in an **outbox**; on network failure keep the item and retry with the *same* `cid`. After a successful write, run `delta`.
+4. `events` (today's notifications for the secretary: refunds, extra charges, postponements, doctor-initiated fee requests) come with every `delta`.
+
+### Whitelisted functions for `call`
+
+`getTodayQueueSnapshot, addNewVisitOrPatient, saveDoctorVisit, addPrescriptionToVisit, addSurgery, updateSurgeryStatus, getSurgeryList, addNewBooking, updateBookingStatus, getBookingSlots, recordClinicExpense, getClinicDashboardStats, searchPatientByNameOrPhone, getPatientFullProfile, getDoctorPatientContext, getDrugLibrary, heartbeatPresence`
+
+Signatures are the existing server functions (see `server/Code.gs`) with these **changes**:
+
+- `addNewBooking({ patientName, phone, date, time })` — `date` `YYYY-MM-DD`, `time` one of the slot starts. Server validates the phone (`07XXXXXXXXX`, 10-digit `7XXXXXXXXX` is accepted and normalised), the date window (current clinic day … +4 days), opening hours (weekday 15:30–19:00, Friday 08:00–12:00) and capacity (4 per clock hour by default). Error text is Arabic. `requestedSlot` is generated by the server (e.g. `4:30 م`).
+- `addNewBooking` / `updateBookingStatus` / `getTodayQueueSnapshot` return `bookings` (today) **and** `upcoming` (tomorrow … +4 days); `systemInitialCheck` returns them as `todayBookings` / `todayUpcoming`.
+- `getBookingSlots({ date })` → `{ date, dates:[…bookable dates], now:{ymd,hm}, slots:[{time,hour,count,hourCount,capacity,full,past}] }`
+- `addNewVisitOrPatient({... , mode })` — `mode: 'free'` creates today's visit with **no fee** (used by the doctor search "رفع الاسم"), `mode: 'paid'` creates it **with** the consultation fee and raises a secretary event "حصّل الكشفية"; without `mode` the automatic rule applies (below).
+- Review-fee rule (server is authoritative, client shows a preview using `shared/core.js` → `reviewFee`): **one** free review within `freeReviewDays` (default 5) of the last paid visit; after the free review is used the next visit is paid again.
+
+### Config object
+
+```json
+{
+  "version": "…", "apiVersion": 1,
+  "clinicName": "…", "doctorName": "…",
+  "consultationFee": 15000, "freeReviewDays": 5,
+  "extraFees": { "consultation": {"label":"كشفية","amount":15000}, "stitches": {"label":"رفع خيوط","amount":15000} },
+  "rules": { "weekday":{"first":"15:30","close":"19:00"}, "friday":{"first":"08:00","close":"12:00"}, "stepMin":30, "perHour":4, "capacityMode":"hour", "maxDaysAhead":4 },
+  "tests": {…}, "rxForms": [[code, arabic, unit, group],…], "rxTimings": {…},
+  "headers": { "Patient_Records": [...21 names], "Financials": [...], "Bookings": [...], "Surgeries": [...], "Drugs": [...] }
+}
+```
+
+## License
+
+See `docs/LICENSING.md`.
+
+## The single public door (website) and the firewall
+
+Apps Script exposes **every top-level function without a trailing `_`** to any visitor of the web app (`google.script.run`). Therefore `server/Code.gs` has exactly four public functions: `doGet`, `doPost`, `setupSheets`, `siteCall`. Everything else ends with `_` and cannot be called from outside. `server/test/firewall.test.js` asserts this list.
+
+- `siteCall(name, args, accessCode)` — the only entry of the website. `name` must be in the allow-list `siteApi_()` (checked with `hasOwnProperty`, so `__proto__`/`constructor` are refused). Optional `SITE_ACCESS_CODE` script property: when set, the site needs it (stored in the browser's `localStorage` key `cm_site`).
+- `getChangeRev_` (was `getChangeRev`) is private; the site polls `rev` through `siteCall`.
+- Device actions (`doPost`) pass `cmAuth_` (hashed device token) before any work.
+
+Limits (`FW_` in `Code.gs`, per minute unless stated): site 400 calls, device 300 calls, request body 400 KB, `args` 400 KB, JSON import 1.5 MB, pairing 8 wrong codes → 10 min lock, site access code 8 wrong → 10 min lock, license 12 wrong keys → 10 min lock, 40 new devices/hour, `setupSheets` max 4/min. Violations answer `{ok:false, code:'BUSY'|'AUTH'|'BAD_REQUEST'}` and are written to the security log `SEC_LOG` (script property, ring buffer of 60 entries, never contains PINs/tokens/keys). The owner sees it in the admin panel ("الأمان").
+
+Script properties to set once: `ADMIN_PIN`, `FINANCE_PIN` (the repo falls back to `1234`; the admin panel warns while it is unset), optional `SITE_ACCESS_CODE`.
