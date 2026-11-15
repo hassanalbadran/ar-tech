@@ -1,0 +1,29 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - name: Shared code is in sync (rules + UI blocks)
+        run: node tools/sync-shared.js --check
+      - name: Server (real Code.gs inside the Apps Script emulator)
+        run: node --test server/test/server.test.js server/test/firewall.test.js
+      - name: Desktop data layer
+        working-directory: desktop
+        run: node --test test/api.test.js
+      - name: Browser tests (Playwright)
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+          node server/test/ui.test.js
+          (node desktop/dev/http-bridge.js --demo --port 5177 &) ; sleep 4
+          node desktop/test/ui.e2e.js 5177
+          node android/test/ui.e2e.js
