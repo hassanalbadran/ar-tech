@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">مدير العيادة</string>
+    <string name="ch_bookings">الحجوزات الجديدة</string>
+    <string name="ch_queue">المراجعون بانتظار الطبيب</string>
+    <string name="n_new_booking">حجز جديد</string>
+    <string name="n_new_bookings">%d حجوزات جديدة</string>
+    <string name="n_waiting">%d مراجع بانتظارك</string>
+    <string name="n_waiting_text">افتح التطبيق لعرض قائمة الانتظار.</string>
+    <string name="w_updated">آخر تحديث %s</string>
+    <string name="w_open_app">افتح التطبيق لتحميل البيانات</string>
+    <string name="w_total">مراجعون</string>
+    <string name="w_waiting">بانتظار</string>
+    <string name="w_bookings">حجوزات</string>
+    <string name="w_net">صافي اليوم</string>
+    <string name="w_title">عيادة اليوم</string>
+    <string name="widget_desc">مراجعو اليوم والحجوزات والمدخول</string>
+    <string name="scan_failed">تعذّر فتح ماسح QR (يتطلب خدمات Google Play)</string>
+</resources>

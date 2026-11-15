@@ -1,0 +1,31 @@
+/* Design tokens. 4 palettes × light/dark, high-contrast and font-scale switches (set on <html> by app.js). */
+:root{
+  --fs:1;
+  --font:'Readex Pro','Segoe UI','Tahoma','Noto Sans Arabic',system-ui,sans-serif;
+  --r-card:22px;--r-in:14px;--r-sm:12px;
+  --sh:0 1px 0 rgba(0,0,0,.04),0 6px 22px rgba(15,35,45,.08);
+  --sh2:0 2px 0 rgba(0,0,0,.03),0 18px 44px rgba(15,35,45,.16);
+  --ok:#1f9d6b;--warn:#d98a12;--bad:#d64545;
+  /* palette 1 — teal & amber (default) */
+  --side:#0c4a5b;--side-2:#0a3e4d;--side-ink:#d9eef3;--side-mut:#8fb9c4;
+  --brand:#0f6a80;--brand-ink:#fff;--brand-soft:#dcedf2;
+  --accent:#f2ae48;--accent-ink:#3a2500;--navy:#232846;
+  --bg:#e8eef1;--card:#fff;--ink:#14212a;--mut:#667785;--line:#dbe4e9;--field:#f5f8fa;--hover:#eef4f7;
+}
+[data-palette="2"]{--side:#262b52;--side-2:#1d2144;--side-ink:#e3e5fb;--side-mut:#9aa0d6;--brand:#4a4fc4;--brand-soft:#e5e6fa;--accent:#ff8a65;--accent-ink:#401200;--navy:#2d1f4d;--bg:#eceef7;--line:#dcdff0;--field:#f6f7fc;--hover:#eff0fa}
+[data-palette="3"]{--side:#1f3d2b;--side-2:#183222;--side-ink:#e1f0e5;--side-mut:#93b9a0;--brand:#3d7d4e;--brand-soft:#e0efe4;--accent:#e3b85a;--accent-ink:#3a2c00;--navy:#22372b;--bg:#eaf0ea;--line:#dae5dc;--field:#f5f9f5;--hover:#eef5ef}
+[data-palette="4"]{--side:#3a2243;--side-2:#2e1a36;--side-ink:#f0e2f5;--side-mut:#bf9ccb;--brand:#8b3fa0;--brand-soft:#f0e1f5;--accent:#f08aa6;--accent-ink:#4a0b21;--navy:#3b1f45;--bg:#f2ecf4;--line:#e6dbea;--field:#faf6fb;--hover:#f5eef7}
+
+/* dark mode (explicit via data-mode, or system when mode=system → app.js sets data-mode) */
+[data-mode="dark"]{--bg:#0d1317;--card:#161f26;--ink:#e8eff3;--mut:#93a4b0;--line:#26333c;--field:#1b2630;--hover:#1e2a34;--brand-soft:#173843;
+  --sh:0 1px 0 rgba(255,255,255,.03),0 6px 22px rgba(0,0,0,.4);--sh2:0 18px 44px rgba(0,0,0,.55);--side:#0a1e25;--side-2:#071419}
+[data-mode="dark"][data-palette="2"]{--side:#13162e;--side-2:#0d1022;--brand-soft:#23265a}
+[data-mode="dark"][data-palette="3"]{--side:#0f2218;--side-2:#0a1810;--brand-soft:#1c3a27}
+[data-mode="dark"][data-palette="4"]{--side:#21122a;--side-2:#180d1f;--brand-soft:#3a1f45}
+[data-mode="dark"]{--brand:color-mix(in srgb,var(--brand) 78%,#fff)}
+
+/* high contrast */
+[data-contrast="high"]{--ink:#000;--mut:#2c3a44;--line:#33414b;--card:#fff;--bg:#fff;--sh:0 0 0 2px #33414b;--sh2:0 0 0 2px #000}
+[data-contrast="high"][data-mode="dark"]{--ink:#fff;--mut:#d3dde3;--line:#9fb2bf;--card:#000;--bg:#000;--field:#0b0b0b;--hover:#1a1a1a;--sh:0 0 0 2px #9fb2bf;--sh2:0 0 0 2px #fff}
+[data-contrast="high"] *:focus-visible{outline:3px solid var(--accent)!important;outline-offset:2px}
+[data-contrast="high"] .chip{border:1.5px solid currentColor}

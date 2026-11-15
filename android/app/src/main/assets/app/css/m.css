@@ -1,0 +1,72 @@
+/* Android (phone) layout — overrides the desktop shell in app.css; components (cards, buttons, chips, dialogs, donut…) are shared. */
+html{-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+body{height:100dvh;overflow:hidden;user-select:none;-webkit-user-select:none}
+input,textarea{user-select:text;-webkit-user-select:text}
+#app{display:flex;flex-direction:column;direction:rtl;height:100dvh;background:var(--bg);position:relative}
+.mt{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top,0px) + 14px) 18px 6px}
+.mt-t small{display:block;color:var(--mut);font-size:.82rem}.mt-t b{font-size:1.35rem;font-weight:600}
+.mt .sp{flex:1}
+.ib.spin svg{animation:rot .8s linear infinite}@keyframes rot{to{transform:rotate(360deg)}}
+#banners .banner{margin:6px 16px 0}
+#view{flex:1;overflow-y:auto;overflow-x:hidden;padding:10px 16px calc(96px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain;scroll-behavior:smooth}
+#view.pg>*{animation:pgin .38s cubic-bezier(.2,.8,.2,1) both}
+#view.pg>*:nth-child(2){animation-delay:.04s}#view.pg>*:nth-child(3){animation-delay:.08s}#view.pg>*:nth-child(4){animation-delay:.12s}#view.pg>*:nth-child(n+5){animation-delay:.16s}
+@keyframes pgin{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes cardin{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+
+/* bottom navigation */
+#tabs{position:fixed;inset-inline:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:40;display:flex;justify-content:space-around;background:var(--card);border-radius:28px;box-shadow:var(--sh2);padding:8px 6px;direction:rtl}
+#tabs button{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:var(--mut);font-size:.7rem;padding:2px 0;transition:color .2s}
+#tabs .pill{display:grid;place-items:center;width:58px;height:32px;border-radius:99px;transition:background .25s,transform .25s cubic-bezier(.3,1.6,.5,1)}
+#tabs .pill .ic{font-size:1.25rem}
+#tabs button.on{color:var(--brand);font-weight:600}#tabs button.on .pill{background:var(--brand-soft);transform:scale(1.06)}
+#tabs button:active .pill{transform:scale(.9)}
+
+/* content */
+.kpis{grid-template-columns:1fr 1fr;gap:12px}.kpi{padding:14px 16px;border-radius:22px}.kpi b{font-size:1.6rem}.kpi.wide{grid-column:1/-1}
+button.kpi{text-align:start;font:inherit}
+h2.sh{margin:20px 4px 8px;font-size:1.02rem}
+.card.list{padding:4px 8px}
+.li{display:flex;align-items:center;gap:12px;width:100%;padding:11px 6px;text-align:start;border-radius:14px;animation:cardin .4s both}
+.li+.li{border-top:1px solid var(--line)}
+button.li:active{background:var(--hover)}
+.li .mid1{flex:1;min-width:0}.li .mid1 b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.li .mid1 small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.8rem}
+.li.big{padding:16px 18px;border-radius:22px;background:var(--card);box-shadow:var(--sh);margin-bottom:14px}.li.big>.ic:first-child{color:var(--brand);font-size:1.5rem}
+.li .acts{display:flex;gap:6px;align-items:center}.ib.sm{width:32px;height:32px;border-radius:10px}
+.sic{position:absolute;inset-inline-start:13px;top:50%;transform:translateY(-50%);color:var(--mut);pointer-events:none}
+.em{text-align:center;color:var(--mut);padding:26px 10px;display:flex;flex-direction:column;align-items:center;gap:8px}.em .ic{font-size:2rem;opacity:.7}
+.ic.big{font-size:2.6rem;color:var(--brand)}
+.sc{margin-bottom:14px;animation:cardin .45s both}.sc h3{display:flex;gap:10px;align-items:center;font-size:1rem;margin-bottom:12px}.sc h3 .ic{color:var(--brand)}
+.rxbox{display:flex;gap:10px;align-items:flex-start;margin:8px 0 2px;padding:10px 12px;border-radius:14px;background:var(--brand-soft);color:var(--ink);font-size:.88rem}.rxbox>.ic{color:var(--brand);font-size:1.3rem;flex:none}
+.or{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:.8rem;margin:10px 0}.or::before,.or::after{content:'';flex:1;height:1px;background:var(--line)}
+.fab{position:fixed;inset-inline-start:20px;bottom:calc(98px + env(safe-area-inset-bottom,0px));width:58px;height:58px;border-radius:20px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;box-shadow:var(--sh2);z-index:30;animation:fabin .4s cubic-bezier(.3,1.6,.5,1) both .25s}
+.fab .ic{font-size:1.5rem}.fab:active{transform:scale(.92)}@keyframes fabin{from{transform:scale(0)}to{transform:none}}
+
+/* bar chart */
+.bars{display:flex;align-items:flex-end;gap:5px;height:150px;margin-top:14px;direction:ltr}
+.bar{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;position:relative}
+.bar i{display:block;width:100%;border-radius:8px 8px 3px 3px;background:var(--brand);opacity:.55;height:0;transition:height .7s cubic-bezier(.2,.9,.3,1) var(--d,0ms),opacity .2s,background .2s}
+.bars.go .bar i{height:var(--h)}.bar.on i{opacity:1;background:var(--accent)}
+.bar small{font-size:.62rem;color:var(--mut)}
+
+/* sheets: <dialog> becomes a bottom sheet */
+dialog{width:100%;max-width:none;margin:auto 0 0;border-radius:28px 28px 0 0;max-height:92dvh;box-shadow:0 -12px 40px rgba(0,0,0,.25)}
+dialog.wide,dialog.mid{width:100%}
+dialog[open]{animation:sheetin .32s cubic-bezier(.2,.9,.3,1)}@keyframes sheetin{from{transform:translateY(100%)}to{transform:none}}
+dialog::backdrop{background:rgba(6,16,22,.5)}
+.db{max-height:calc(92dvh - 72px);padding-bottom:calc(22px + env(safe-area-inset-bottom,0px))}
+.dh::before{content:'';position:absolute;top:7px;left:50%;width:40px;height:4px;border-radius:4px;background:var(--line);transform:translateX(-50%)}.dh{position:relative;padding-top:20px}
+.dys{display:flex;gap:8px;overflow-x:auto;padding:4px 2px 8px}.dys button{min-width:70px;flex:none}
+.slg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#toasts{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
+.wiz{margin:calc(env(safe-area-inset-top,0px) + 6vh) auto 0;text-align:center}
+.lic .card{width:min(440px,100%)}
+@media (min-width:700px){#app{max-width:520px;margin:0 auto}}
+
+/* ---- smooth scrolling ---- */
+#view,.db,.dys,dialog{overscroll-behavior:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+#view{scroll-behavior:smooth;will-change:scroll-position;transform:translateZ(0)}
+#view::-webkit-scrollbar,.db::-webkit-scrollbar,.dys::-webkit-scrollbar{display:none}
+dialog::backdrop{backdrop-filter:none}
+.dys{scroll-snap-type:x proximity;scroll-behavior:smooth}.dys>*{scroll-snap-align:center}
+@media (prefers-reduced-motion:reduce){#view,.dys{scroll-behavior:auto}.li{animation:none}}

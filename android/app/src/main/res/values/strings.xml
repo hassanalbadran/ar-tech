@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Clinic Manager</string>
+    <string name="ch_bookings">New bookings</string>
+    <string name="ch_queue">Waiting patients</string>
+    <string name="n_new_booking">New booking</string>
+    <string name="n_new_bookings">%d new bookings</string>
+    <string name="n_waiting">%d patient(s) waiting</string>
+    <string name="n_waiting_text">Open the app to see the queue.</string>
+    <string name="w_updated">Updated %s</string>
+    <string name="w_open_app">Open the app to load data</string>
+    <string name="w_total">Patients</string>
+    <string name="w_waiting">Waiting</string>
+    <string name="w_bookings">Bookings</string>
+    <string name="w_net">Net today</string>
+    <string name="w_title">Clinic today</string>
+    <string name="widget_desc">Today\'s patients, bookings and income</string>
+    <string name="scan_failed">Could not open the QR scanner (needs Google Play services)</string>
+</resources>
