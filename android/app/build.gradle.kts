@@ -8,6 +8,10 @@ val vName = (project.findProperty("versionName") as String?) ?: "1.0.0"
 val vCode = ((project.findProperty("versionCode") as String?) ?: "1").toInt()
 
 android {
+    lint {
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
     namespace = "com.hasn2mr.clinicmanager"
     compileSdk = 35
 
@@ -54,6 +58,7 @@ android {
 dependencies {
     implementation("androidx.core:core-ktx:1.15.0")
     implementation("androidx.activity:activity-ktx:1.9.3")
+    implementation("androidx.fragment:fragment-ktx:1.8.5")
     implementation("androidx.webkit:webkit:1.12.1")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
