@@ -10,9 +10,9 @@
  *  APP_NAME            Product name shown in window titles.
  */
 module.exports = {
-  LICENSE_SERVER_URL: '',
-  GITHUB_OWNER: '',
-  GITHUB_REPO: '',
-  DEVELOPER_URL: '',
+  LICENSE_SERVER_URL: 'https://script.google.com/macros/s/AKfycbyFYO236qrVZcS6a6g85jfbkc_up2agnFq-AXlZbBHk0sKedxMLnEEYyprpNCHvfoFaQg/exec',
+  GITHUB_OWNER: 'https://github.com/hassanalbadran',
+  GITHUB_REPO: 'https://github.com/hassanalbadran/ar-tech',
+  DEVELOPER_URL: 'https://hasn2mr.pages.dev/',
   APP_NAME: 'Clinic Manager'
 };
