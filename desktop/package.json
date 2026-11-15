@@ -1,0 +1,27 @@
+{
+  "name": "clinic-manager-desktop",
+  "version": "1.0.0",
+  "description": "Clinic Manager - desktop app (Electron) with local SQLite mirror and offline outbox",
+  "main": "main.js",
+  "private": true,
+  "license": "MIT",
+  "author": "Hasn (t.me/hasn2mr)",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/api.test.js",
+    "dev:bridge": "node dev/http-bridge.js --port 5177 --data ./.devdata",
+    "dist": "electron-builder --win",
+    "test:ui": "node dev/http-bridge.js --demo --port 5177 & sleep 3 && node test/ui.e2e.js 5177; kill %1"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.2.0",
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "electron": "^37.2.0",
+    "electron-builder": "^26.0.12"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

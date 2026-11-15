@@ -1,0 +1,35 @@
+# electron-builder configuration. owner/repo below are placeholders: CI overrides them
+# (-c.publish.owner / -c.publish.repo) and they should match GITHUB_OWNER / GITHUB_REPO in config.js.
+appId: com.hasn2mr.clinicmanager
+productName: Clinic Manager
+directories:
+  output: dist
+  buildResources: build
+files:
+  - lib/**
+  - renderer/**
+  - main.js
+  - preload.js
+  - config.js
+  - build/**
+  - package.json
+  - "!**/*.test.js"
+npmRebuild: true          # rebuilds better-sqlite3 against Electron's ABI
+asar: true
+win:
+  icon: build/icon.png
+  target:
+    - { target: nsis, arch: [x64] }
+    - { target: portable, arch: [x64] }
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+portable:
+  artifactName: "${productName}-portable-${version}.${ext}"
+publish:
+  provider: github
+  owner: YOUR_GITHUB_OWNER
+  repo: YOUR_GITHUB_REPO
+  releaseType: release
